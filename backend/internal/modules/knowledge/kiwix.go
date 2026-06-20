@@ -1,6 +1,7 @@
 package knowledge
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -31,7 +33,8 @@ type KiwixManager struct {
 	port          int
 	running       bool
 	zimFiles      []ZIMFile
-	cancelFunc    func()
+	cancelFunc    context.CancelFunc
+	cmd           *exec.Cmd
 }
 
 // NewKiwixManager creates a new KiwixManager.
@@ -126,6 +129,70 @@ func (km *KiwixManager) FindSidecar() (string, error) {
 	}
 
 	return "", fmt.Errorf("kiwix-serve binary not found; place it in sidecars/kiwix-serve/windows/")
+}
+
+// Start launches the kiwix-serve process if it exists and ZIM files are found.
+func (km *KiwixManager) Start() error {
+	km.mu.Lock()
+	defer km.mu.Unlock()
+
+	if km.running {
+		return nil
+	}
+
+	if km.sidecarPath == "" {
+		return fmt.Errorf("kiwix-serve not found")
+	}
+
+	if len(km.zimFiles) == 0 {
+		return fmt.Errorf("no ZIM files found to serve")
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	km.cancelFunc = cancel
+
+	// Build args: --port=9080 file1.zim file2.zim
+	args := []string{fmt.Sprintf("--port=%d", km.port)}
+	for _, zf := range km.zimFiles {
+		args = append(args, zf.Path)
+	}
+
+	km.cmd = exec.CommandContext(ctx, km.sidecarPath, args...)
+	
+	// Start the process
+	if err := km.cmd.Start(); err != nil {
+		cancel()
+		return fmt.Errorf("failed to start kiwix-serve: %w", err)
+	}
+
+	km.running = true
+	log.Printf("✓ Knowledge module: started kiwix-serve on port %d with %d ZIM files", km.port, len(km.zimFiles))
+
+	// Monitor process in background
+	go func() {
+		err := km.cmd.Wait()
+		km.mu.Lock()
+		km.running = false
+		km.cmd = nil
+		km.mu.Unlock()
+		if err != nil && err.Error() != "signal: killed" {
+			log.Printf("! Knowledge module: kiwix-serve exited with error: %v", err)
+		} else {
+			log.Printf("  Knowledge module: kiwix-serve stopped")
+		}
+	}()
+
+	return nil
+}
+
+// Stop terminates the kiwix-serve process.
+func (km *KiwixManager) Stop() {
+	km.mu.Lock()
+	defer km.mu.Unlock()
+	if km.cancelFunc != nil {
+		km.cancelFunc()
+		km.cancelFunc = nil
+	}
 }
 
 // IsRunning returns whether kiwix-serve is currently running.

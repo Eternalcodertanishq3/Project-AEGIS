@@ -14,6 +14,7 @@ import (
 
 	"aegis/backend"
 	"aegis/backend/internal/api"
+	"aegis/backend/internal/modules/ai"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
 	"aegis/backend/internal/orchestrator"
@@ -77,6 +78,15 @@ func main() {
 	kiwixMgr.DiscoverZIMFiles()
 	zimFiles := kiwixMgr.GetZIMFiles()
 	log.Printf("✓ Knowledge module: %d ZIM files discovered", len(zimFiles))
+	
+	if _, err := kiwixMgr.FindSidecar(); err == nil {
+		if err := kiwixMgr.Start(); err != nil {
+			log.Printf("⚠ Knowledge module: failed to start kiwix-serve: %v", err)
+		}
+	} else {
+		log.Printf("⚠ Knowledge module: %v", err)
+	}
+	
 	knowledgeHandlers := knowledge.NewHandlers(kiwixMgr)
 
 	// ─── Maps Module ─────────────────────────────────────────────────
@@ -86,6 +96,20 @@ func main() {
 	log.Printf("✓ Maps module: %d PMTiles files discovered", len(mapFiles))
 	mapsHandlers := maps.NewHandlers(mapMgr)
 
+	// ─── AI Module ───────────────────────────────────────────────────
+	aiMgr := ai.NewAIManager(*dataDir, 8081)
+	aiMgr.DiscoverModels()
+	aiModels := aiMgr.GetModels()
+	log.Printf("✓ AI module: %d GGUF models discovered", len(aiModels))
+
+	if _, err := aiMgr.FindSidecar(); err == nil {
+		log.Printf("✓ AI module: llama-server found")
+	} else {
+		log.Printf("⚠ AI module: %v", err)
+	}
+
+	aiHandlers := ai.NewHandlers(aiMgr)
+
 	// ─── HTTP Router ─────────────────────────────────────────────────
 	deps := &api.Deps{
 		Profiler:          profiler,
@@ -93,6 +117,7 @@ func main() {
 		Orchestrator:      orch,
 		KnowledgeHandlers: knowledgeHandlers,
 		MapsHandlers:      mapsHandlers,
+		AIHandlers:        aiHandlers,
 	}
 	handler := api.NewRouter(deps, backend.EmbeddedFrontend)
 
@@ -137,6 +162,9 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	kiwixMgr.Stop()
+	aiMgr.Stop()
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("forced shutdown: %v", err)

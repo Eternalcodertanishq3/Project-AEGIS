@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"aegis/backend/internal/modules/ai"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
 	"aegis/backend/internal/orchestrator"
@@ -19,6 +20,7 @@ type Deps struct {
 	Orchestrator      *orchestrator.Orchestrator
 	KnowledgeHandlers *knowledge.Handlers
 	MapsHandlers      *maps.Handlers
+	AIHandlers        *ai.Handlers
 }
 
 // healthHandler returns system health.

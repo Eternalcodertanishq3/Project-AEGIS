@@ -30,6 +30,11 @@ func NewRouter(deps *Deps, frontendFS fs.FS) http.Handler {
 		deps.MapsHandlers.RegisterRoutes(mux)
 	}
 
+	// ─── AI Module Routes ─────────────────────────────────────────────
+	if deps.AIHandlers != nil {
+		deps.AIHandlers.RegisterRoutes(mux)
+	}
+
 	// ─── Embedded Frontend ───────────────────────────────────────────
 	fileServer := http.FileServerFS(frontendFS)
 	mux.Handle("/", fileServer)

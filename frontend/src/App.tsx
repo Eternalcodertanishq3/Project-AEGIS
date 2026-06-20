@@ -6,6 +6,7 @@ import { ModuleGrid } from '@/components/ModuleGrid'
 import { Footer } from '@/components/Footer'
 import { KnowledgePage } from '@/modules/knowledge/KnowledgePage'
 import { MapsPage } from '@/modules/maps/MapsPage'
+import { AIPage } from '@/modules/ai/AIPage'
 import { useSystemProfile } from '@/hooks/useSystemProfile'
 import { useModules } from '@/hooks/useModules'
 
@@ -20,6 +21,8 @@ function App() {
         return <KnowledgePage />
       case 'offline-maps':
         return <MapsPage />
+      case 'ai-assistant':
+        return <AIPage />
       case 'overview':
       default:
         return (
