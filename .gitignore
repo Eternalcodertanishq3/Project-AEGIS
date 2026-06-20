@@ -1,0 +1,21 @@
+# Build artifacts
+aegis.exe
+*.exe
+*.test
+*.out
+*.app
+
+# Backend
+aegis-data/
+content-packs/
+sidecars/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.npm/
+frontend/npm-debug.log*
+
+# OS specific
+.DS_Store
+Thumbs.db

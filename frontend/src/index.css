@@ -1,0 +1,68 @@
+/* Inter font — loaded from fontsource for offline support */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-700/50;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-600;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg;
+  }
+
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-dot-active {
+    @apply bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)];
+  }
+
+  .status-dot-inactive {
+    @apply bg-slate-500;
+  }
+
+  .status-dot-critical {
+    @apply bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)];
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.15), 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.15), 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+}
