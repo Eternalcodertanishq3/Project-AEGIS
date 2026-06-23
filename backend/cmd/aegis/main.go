@@ -15,11 +15,14 @@ import (
 	"aegis/backend"
 	"aegis/backend/internal/api"
 	"aegis/backend/internal/modules/ai"
+	"aegis/backend/internal/modules/celestial"
 	"aegis/backend/internal/modules/datatools"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
 	"aegis/backend/internal/modules/medical"
 	"aegis/backend/internal/modules/notes"
+	"aegis/backend/internal/modules/plantid"
+	"aegis/backend/internal/modules/skilltrees"
 	"aegis/backend/internal/orchestrator"
 	"aegis/backend/internal/powermanager"
 	"aegis/backend/internal/resourceprofiler"
@@ -130,17 +133,34 @@ func main() {
 	dtHandlers := datatools.NewHandlers()
 	log.Println("✓ Data Tools module: ready")
 
+	// ─── Skill Trees Module ─────────────────────────────────────────
+	stDB := skilltrees.NewSkillTreeDB()
+	log.Printf("✓ Skill Trees module: %d categories, %d skills loaded", len(stDB.GetCategories()), countSkills(stDB))
+	stHandlers := skilltrees.NewHandlers(stDB)
+
+	// ─── Celestial Navigation Module ────────────────────────────────
+	celHandlers := celestial.NewHandlers()
+	log.Println("✓ Celestial Navigation module: ready")
+
+	// ─── Plant/Fungi ID Module ──────────────────────────────────────
+	plantDB := plantid.NewPlantDB()
+	log.Printf("✓ Plant/Fungi ID module: %d groups, %d species loaded", len(plantDB.GetGroups()), countPlants(plantDB))
+	plantHandlers := plantid.NewHandlers(plantDB)
+
 	// ─── HTTP Router ─────────────────────────────────────────────────
 	deps := &api.Deps{
-		Profiler:           profiler,
-		PowerManager:       pm,
-		Orchestrator:       orch,
-		KnowledgeHandlers:  knowledgeHandlers,
-		MapsHandlers:       mapsHandlers,
-		AIHandlers:         aiHandlers,
-		NotesHandlers:      notesHandlers,
-		MedicalHandlers:    medicalHandlers,
-		DataToolsHandlers:  dtHandlers,
+		Profiler:            profiler,
+		PowerManager:        pm,
+		Orchestrator:        orch,
+		KnowledgeHandlers:   knowledgeHandlers,
+		MapsHandlers:        mapsHandlers,
+		AIHandlers:          aiHandlers,
+		NotesHandlers:       notesHandlers,
+		MedicalHandlers:     medicalHandlers,
+		DataToolsHandlers:   dtHandlers,
+		SkillTreesHandlers:  stHandlers,
+		CelestialHandlers:   celHandlers,
+		PlantIDHandlers:     plantHandlers,
 	}
 	handler := api.NewRouter(deps, backend.EmbeddedFrontend)
 
@@ -193,4 +213,20 @@ func main() {
 		log.Fatalf("forced shutdown: %v", err)
 	}
 	log.Println("AEGIS shut down cleanly. Stay alive out there. 🏕️")
+}
+
+func countSkills(db *skilltrees.SkillTreeDB) int {
+	count := 0
+	for _, c := range db.GetCategories() {
+		count += len(c.Skills)
+	}
+	return count
+}
+
+func countPlants(db *plantid.PlantDB) int {
+	count := 0
+	for _, g := range db.GetGroups() {
+		count += len(g.Plants)
+	}
+	return count
 }

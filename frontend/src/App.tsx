@@ -10,6 +10,9 @@ import { AIPage } from '@/modules/ai/AIPage'
 import { NotesPage } from '@/modules/notes/NotesPage'
 import { MedicalPage } from '@/modules/medical/MedicalPage'
 import { DataToolsPage } from '@/modules/datatools/DataToolsPage'
+import { SkillTreesPage } from '@/modules/skilltrees/SkillTreesPage'
+import { CelestialPage } from '@/modules/celestial/CelestialPage'
+import { PlantIDPage } from '@/modules/plantid/PlantIDPage'
 import { useSystemProfile } from '@/hooks/useSystemProfile'
 import { useModules } from '@/hooks/useModules'
 
@@ -32,6 +35,12 @@ function App() {
         return <MedicalPage />
       case 'data-tools':
         return <DataToolsPage />
+      case 'skill-trees':
+        return <SkillTreesPage />
+      case 'celestial-nav':
+        return <CelestialPage />
+      case 'plant-fungi-id':
+        return <PlantIDPage />
       case 'overview':
       default:
         return (

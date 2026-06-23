@@ -50,6 +50,21 @@ func NewRouter(deps *Deps, frontendFS fs.FS) http.Handler {
 		deps.DataToolsHandlers.RegisterRoutes(mux)
 	}
 
+	// ─── Skill Trees Module Routes ────────────────────────────────────
+	if deps.SkillTreesHandlers != nil {
+		deps.SkillTreesHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Celestial Navigation Module Routes ───────────────────────────
+	if deps.CelestialHandlers != nil {
+		deps.CelestialHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Plant/Fungi ID Module Routes ─────────────────────────────────
+	if deps.PlantIDHandlers != nil {
+		deps.PlantIDHandlers.RegisterRoutes(mux)
+	}
+
 	// ─── Embedded Frontend ───────────────────────────────────────────
 	fileServer := http.FileServerFS(frontendFS)
 	mux.Handle("/", fileServer)
