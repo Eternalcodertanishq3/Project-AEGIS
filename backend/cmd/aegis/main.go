@@ -15,8 +15,11 @@ import (
 	"aegis/backend"
 	"aegis/backend/internal/api"
 	"aegis/backend/internal/modules/ai"
+	"aegis/backend/internal/modules/datatools"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
+	"aegis/backend/internal/modules/medical"
+	"aegis/backend/internal/modules/notes"
 	"aegis/backend/internal/orchestrator"
 	"aegis/backend/internal/powermanager"
 	"aegis/backend/internal/resourceprofiler"
@@ -110,14 +113,34 @@ func main() {
 
 	aiHandlers := ai.NewHandlers(aiMgr)
 
+	// ─── Notes Module ───────────────────────────────────────────────
+	notesMgr, err := notes.NewNotesManager(db.GetDB())
+	if err != nil {
+		log.Fatalf("notes module init failed: %v", err)
+	}
+	log.Println("✓ Notes module: ready")
+	notesHandlers := notes.NewHandlers(notesMgr)
+
+	// ─── Medical Module ─────────────────────────────────────────────
+	medDB := medical.NewMedicalDB()
+	log.Printf("✓ Medical module: %d categories loaded", len(medDB.GetCategories()))
+	medicalHandlers := medical.NewHandlers(medDB)
+
+	// ─── Data Tools Module ──────────────────────────────────────────
+	dtHandlers := datatools.NewHandlers()
+	log.Println("✓ Data Tools module: ready")
+
 	// ─── HTTP Router ─────────────────────────────────────────────────
 	deps := &api.Deps{
-		Profiler:          profiler,
-		PowerManager:      pm,
-		Orchestrator:      orch,
-		KnowledgeHandlers: knowledgeHandlers,
-		MapsHandlers:      mapsHandlers,
-		AIHandlers:        aiHandlers,
+		Profiler:           profiler,
+		PowerManager:       pm,
+		Orchestrator:       orch,
+		KnowledgeHandlers:  knowledgeHandlers,
+		MapsHandlers:       mapsHandlers,
+		AIHandlers:         aiHandlers,
+		NotesHandlers:      notesHandlers,
+		MedicalHandlers:    medicalHandlers,
+		DataToolsHandlers:  dtHandlers,
 	}
 	handler := api.NewRouter(deps, backend.EmbeddedFrontend)
 

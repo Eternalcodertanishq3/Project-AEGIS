@@ -6,8 +6,11 @@ import (
 	"net/http"
 
 	"aegis/backend/internal/modules/ai"
+	"aegis/backend/internal/modules/datatools"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
+	"aegis/backend/internal/modules/medical"
+	"aegis/backend/internal/modules/notes"
 	"aegis/backend/internal/orchestrator"
 	"aegis/backend/internal/powermanager"
 	"aegis/backend/internal/resourceprofiler"
@@ -15,12 +18,15 @@ import (
 
 // Deps holds all injected dependencies for API handlers.
 type Deps struct {
-	Profiler          resourceprofiler.Profiler
-	PowerManager      powermanager.PowerManager
-	Orchestrator      *orchestrator.Orchestrator
-	KnowledgeHandlers *knowledge.Handlers
-	MapsHandlers      *maps.Handlers
-	AIHandlers        *ai.Handlers
+	Profiler           resourceprofiler.Profiler
+	PowerManager       powermanager.PowerManager
+	Orchestrator       *orchestrator.Orchestrator
+	KnowledgeHandlers  *knowledge.Handlers
+	MapsHandlers       *maps.Handlers
+	AIHandlers         *ai.Handlers
+	NotesHandlers      *notes.Handlers
+	MedicalHandlers    *medical.Handlers
+	DataToolsHandlers  *datatools.Handlers
 }
 
 // healthHandler returns system health.

@@ -7,6 +7,9 @@ import { Footer } from '@/components/Footer'
 import { KnowledgePage } from '@/modules/knowledge/KnowledgePage'
 import { MapsPage } from '@/modules/maps/MapsPage'
 import { AIPage } from '@/modules/ai/AIPage'
+import { NotesPage } from '@/modules/notes/NotesPage'
+import { MedicalPage } from '@/modules/medical/MedicalPage'
+import { DataToolsPage } from '@/modules/datatools/DataToolsPage'
 import { useSystemProfile } from '@/hooks/useSystemProfile'
 import { useModules } from '@/hooks/useModules'
 
@@ -23,6 +26,12 @@ function App() {
         return <MapsPage />
       case 'ai-assistant':
         return <AIPage />
+      case 'notes':
+        return <NotesPage />
+      case 'medical-triage':
+        return <MedicalPage />
+      case 'data-tools':
+        return <DataToolsPage />
       case 'overview':
       default:
         return (

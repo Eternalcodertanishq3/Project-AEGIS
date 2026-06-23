@@ -35,6 +35,21 @@ func NewRouter(deps *Deps, frontendFS fs.FS) http.Handler {
 		deps.AIHandlers.RegisterRoutes(mux)
 	}
 
+	// ─── Notes Module Routes ──────────────────────────────────────────
+	if deps.NotesHandlers != nil {
+		deps.NotesHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Medical Module Routes ────────────────────────────────────────
+	if deps.MedicalHandlers != nil {
+		deps.MedicalHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Data Tools Module Routes ─────────────────────────────────────
+	if deps.DataToolsHandlers != nil {
+		deps.DataToolsHandlers.RegisterRoutes(mux)
+	}
+
 	// ─── Embedded Frontend ───────────────────────────────────────────
 	fileServer := http.FileServerFS(frontendFS)
 	mux.Handle("/", fileServer)
