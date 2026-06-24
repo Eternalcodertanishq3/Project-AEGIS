@@ -65,6 +65,31 @@ func NewRouter(deps *Deps, frontendFS fs.FS) http.Handler {
 		deps.PlantIDHandlers.RegisterRoutes(mux)
 	}
 
+	// ─── Mesh Messaging Module Routes ─────────────────────────────────
+	if deps.MeshHandlers != nil {
+		deps.MeshHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Encrypted P2P Module Routes ──────────────────────────────────
+	if deps.P2PHandlers != nil {
+		deps.P2PHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── SDR Monitor Module Routes ────────────────────────────────────
+	if deps.SDRHandlers != nil {
+		deps.SDRHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Local Peer Sync Module Routes ────────────────────────────────
+	if deps.PeerSyncHandlers != nil {
+		deps.PeerSyncHandlers.RegisterRoutes(mux)
+	}
+
+	// ─── Position Beacon Module Routes ────────────────────────────────
+	if deps.BeaconHandlers != nil {
+		deps.BeaconHandlers.RegisterRoutes(mux)
+	}
+
 	// ─── Embedded Frontend ───────────────────────────────────────────
 	fileServer := http.FileServerFS(frontendFS)
 	mux.Handle("/", fileServer)

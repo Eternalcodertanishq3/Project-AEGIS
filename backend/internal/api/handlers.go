@@ -6,13 +6,18 @@ import (
 	"net/http"
 
 	"aegis/backend/internal/modules/ai"
+	"aegis/backend/internal/modules/beacon"
 	"aegis/backend/internal/modules/celestial"
 	"aegis/backend/internal/modules/datatools"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
 	"aegis/backend/internal/modules/medical"
+	"aegis/backend/internal/modules/mesh"
 	"aegis/backend/internal/modules/notes"
+	"aegis/backend/internal/modules/p2p"
+	"aegis/backend/internal/modules/peersync"
 	"aegis/backend/internal/modules/plantid"
+	"aegis/backend/internal/modules/sdr"
 	"aegis/backend/internal/modules/skilltrees"
 	"aegis/backend/internal/orchestrator"
 	"aegis/backend/internal/powermanager"
@@ -33,6 +38,11 @@ type Deps struct {
 	SkillTreesHandlers  *skilltrees.Handlers
 	CelestialHandlers   *celestial.Handlers
 	PlantIDHandlers     *plantid.Handlers
+	MeshHandlers        *mesh.Handlers
+	P2PHandlers         *p2p.Handlers
+	SDRHandlers         *sdr.Handlers
+	PeerSyncHandlers    *peersync.Handlers
+	BeaconHandlers      *beacon.Handlers
 }
 
 // healthHandler returns system health.

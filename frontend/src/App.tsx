@@ -13,6 +13,11 @@ import { DataToolsPage } from '@/modules/datatools/DataToolsPage'
 import { SkillTreesPage } from '@/modules/skilltrees/SkillTreesPage'
 import { CelestialPage } from '@/modules/celestial/CelestialPage'
 import { PlantIDPage } from '@/modules/plantid/PlantIDPage'
+import { MeshPage } from '@/modules/mesh/MeshPage'
+import { P2PPage } from '@/modules/p2p/P2PPage'
+import { SDRPage } from '@/modules/sdr/SDRPage'
+import { PeerSyncPage } from '@/modules/peersync/PeerSyncPage'
+import { BeaconPage } from '@/modules/beacon/BeaconPage'
 import { useSystemProfile } from '@/hooks/useSystemProfile'
 import { useModules } from '@/hooks/useModules'
 
@@ -41,6 +46,16 @@ function App() {
         return <CelestialPage />
       case 'plant-fungi-id':
         return <PlantIDPage />
+      case 'mesh-messaging':
+        return <MeshPage />
+      case 'encrypted-p2p':
+        return <P2PPage />
+      case 'sdr-monitor':
+        return <SDRPage />
+      case 'local-peer-sync':
+        return <PeerSyncPage />
+      case 'position-beacon':
+        return <BeaconPage />
       case 'overview':
       default:
         return (

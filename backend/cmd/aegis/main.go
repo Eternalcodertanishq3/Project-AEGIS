@@ -15,13 +15,18 @@ import (
 	"aegis/backend"
 	"aegis/backend/internal/api"
 	"aegis/backend/internal/modules/ai"
+	"aegis/backend/internal/modules/beacon"
 	"aegis/backend/internal/modules/celestial"
 	"aegis/backend/internal/modules/datatools"
 	"aegis/backend/internal/modules/knowledge"
 	"aegis/backend/internal/modules/maps"
 	"aegis/backend/internal/modules/medical"
+	"aegis/backend/internal/modules/mesh"
 	"aegis/backend/internal/modules/notes"
+	"aegis/backend/internal/modules/p2p"
+	"aegis/backend/internal/modules/peersync"
 	"aegis/backend/internal/modules/plantid"
+	"aegis/backend/internal/modules/sdr"
 	"aegis/backend/internal/modules/skilltrees"
 	"aegis/backend/internal/orchestrator"
 	"aegis/backend/internal/powermanager"
@@ -147,6 +152,44 @@ func main() {
 	log.Printf("✓ Plant/Fungi ID module: %d groups, %d species loaded", len(plantDB.GetGroups()), countPlants(plantDB))
 	plantHandlers := plantid.NewHandlers(plantDB)
 
+	// ─── Mesh Messaging Module ────────────────────────────────────
+	meshMgr, err := mesh.NewMeshManager(db.GetDB())
+	if err != nil {
+		log.Fatalf("mesh module init failed: %v", err)
+	}
+	log.Printf("✓ Mesh Messaging module: %d channels, node %s", len(meshMgr.GetChannels()), meshMgr.GetStatus().NodeID)
+	meshHandlers := mesh.NewHandlers(meshMgr)
+
+	// ─── Encrypted P2P Module ──────────────────────────────────────
+	p2pMgr, err := p2p.NewP2PManager(db.GetDB())
+	if err != nil {
+		log.Fatalf("p2p module init failed: %v", err)
+	}
+	log.Printf("✓ Encrypted P2P module: key generated, public=%s...", p2pMgr.GetStatus().PublicKey[:16])
+	p2pHandlers := p2p.NewHandlers(p2pMgr)
+
+	// ─── SDR Monitor Module ───────────────────────────────────────
+	sdrDB := sdr.NewSDRDatabase()
+	sdrStatus := sdrDB.GetStatus()
+	log.Printf("✓ SDR Monitor module: %d frequencies, %d band plans (mode: %s)", sdrStatus.FrequencyCount, sdrStatus.BandPlanCount, sdrStatus.Mode)
+	sdrHandlers := sdr.NewHandlers(sdrDB)
+
+	// ─── Local Peer Sync Module ───────────────────────────────────
+	syncMgr, err := peersync.NewSyncManager(db.GetDB())
+	if err != nil {
+		log.Fatalf("peer sync module init failed: %v", err)
+	}
+	log.Println("✓ Local Peer Sync module: ready")
+	syncHandlers := peersync.NewHandlers(syncMgr)
+
+	// ─── Position Beacon Module ───────────────────────────────────
+	beaconMgr, err := beacon.NewBeaconManager(db.GetDB())
+	if err != nil {
+		log.Fatalf("beacon module init failed: %v", err)
+	}
+	log.Printf("✓ Position Beacon module: callsign %s", beaconMgr.GetStatus().Callsign)
+	beaconHandlers := beacon.NewHandlers(beaconMgr)
+
 	// ─── HTTP Router ─────────────────────────────────────────────────
 	deps := &api.Deps{
 		Profiler:            profiler,
@@ -161,6 +204,11 @@ func main() {
 		SkillTreesHandlers:  stHandlers,
 		CelestialHandlers:   celHandlers,
 		PlantIDHandlers:     plantHandlers,
+		MeshHandlers:        meshHandlers,
+		P2PHandlers:         p2pHandlers,
+		SDRHandlers:         sdrHandlers,
+		PeerSyncHandlers:    syncHandlers,
+		BeaconHandlers:      beaconHandlers,
 	}
 	handler := api.NewRouter(deps, backend.EmbeddedFrontend)
 
