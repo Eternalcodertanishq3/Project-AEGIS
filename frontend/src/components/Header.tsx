@@ -4,7 +4,6 @@ import {
   WifiOff,
   Monitor,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import type { SystemProfile, HardwareTier } from '@/types'
 
 interface HeaderProps {
@@ -19,51 +18,52 @@ const tierColors: Record<HardwareTier, string> = {
 
 export function Header({ profile }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-700/50 bg-slate-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-800/50 bg-slate-900/60 backdrop-blur-xl shadow-lg shadow-black/20">
       <div className="flex h-14 items-center justify-between px-4 lg:px-6">
         {/* Left — Branding */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-600/20 border border-emerald-500/30">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
             <Shield className="h-4.5 w-4.5 text-emerald-400" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-wide text-slate-100">
+            <span className="text-base font-bold tracking-widest uppercase text-slate-100">
               AEGIS
             </span>
-            <span className="hidden sm:inline text-slate-500 text-sm font-normal">
+            <span className="hidden sm:inline text-slate-600 text-sm font-normal">
               /
             </span>
-            <span className="hidden sm:inline text-sm text-slate-400 font-medium">
+            <span className="hidden sm:inline text-xs text-slate-400 font-bold uppercase tracking-wider">
               Command center
             </span>
           </div>
         </div>
 
         {/* Right — Status badges */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Online/Offline */}
-          <Badge
-            variant={profile.isOnline ? 'default' : 'secondary'}
-            className="gap-1.5 text-xs"
-          >
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+            profile.isOnline 
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+              : 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+          }`}>
             {profile.isOnline ? (
               <Wifi className="h-3 w-3" />
             ) : (
               <WifiOff className="h-3 w-3" />
             )}
             {profile.isOnline ? 'Online' : 'Offline'}
-          </Badge>
+          </div>
 
           {/* Hardware Tier */}
-          <Badge className={`gap-1.5 text-xs border ${tierColors[profile.hardwareTier]}`}>
+          <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${tierColors[profile.hardwareTier]}`}>
             <Monitor className="h-3 w-3" />
             {profile.hardwareTier}
-          </Badge>
+          </div>
 
           {/* OS */}
-          <Badge variant="outline" className="hidden md:inline-flex gap-1 text-xs">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800/50 text-slate-400 border border-slate-700/50">
             {profile.os} {profile.arch}
-          </Badge>
+          </div>
         </div>
       </div>
     </header>

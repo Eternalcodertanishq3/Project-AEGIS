@@ -35,6 +35,7 @@ type KiwixManager struct {
 	zimFiles      []ZIMFile
 	cancelFunc    context.CancelFunc
 	cmd           *exec.Cmd
+	lastError     string
 }
 
 // NewKiwixManager creates a new KiwixManager.
@@ -43,6 +44,7 @@ func NewKiwixManager(dataDir string, sidecarPort int) *KiwixManager {
 		dataDir: dataDir,
 		port:    sidecarPort,
 		zimFiles: make([]ZIMFile, 0),
+		lastError: "",
 	}
 }
 
@@ -177,7 +179,22 @@ func (km *KiwixManager) Start() error {
 		km.mu.Unlock()
 		if err != nil && err.Error() != "signal: killed" {
 			log.Printf("! Knowledge module: kiwix-serve exited with error: %v", err)
+			
+			km.mu.Lock()
+			km.running = false
+			km.cmd = nil
+			// Detect Windows missing DLL error (0xc0000135)
+			if strings.Contains(err.Error(), "0xc0000135") || strings.Contains(err.Error(), "3221225781") {
+				km.lastError = "Missing Windows C++ Redistributable (libgcc_s_seh-1.dll, etc). Run download-kiwix.ps1 or install VC++ Redist."
+				log.Printf("! Knowledge module: CRITICAL - " + km.lastError)
+			} else {
+				km.lastError = err.Error()
+			}
+			km.mu.Unlock()
 		} else {
+			km.mu.Lock()
+			km.lastError = ""
+			km.mu.Unlock()
 			log.Printf("  Knowledge module: kiwix-serve stopped")
 		}
 	}()
@@ -200,6 +217,13 @@ func (km *KiwixManager) IsRunning() bool {
 	km.mu.RLock()
 	defer km.mu.RUnlock()
 	return km.running
+}
+
+// GetLastError returns the last error encountered.
+func (km *KiwixManager) GetLastError() string {
+	km.mu.RLock()
+	defer km.mu.RUnlock()
+	return km.lastError
 }
 
 // Port returns the port kiwix-serve is running on.

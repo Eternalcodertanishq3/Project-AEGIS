@@ -12,9 +12,9 @@ export function useModules() {
 
     async function fetchModules() {
       try {
-        const data = await apiFetch<Module[]>('/modules')
+        const data = await apiFetch<{modules: Module[], count: number}>('/modules')
         if (!cancelled) {
-          setModules(data)
+          setModules(data.modules || [])
         }
       } catch {
         // Fall back to defaults when backend is unavailable

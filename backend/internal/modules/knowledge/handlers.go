@@ -44,6 +44,9 @@ func (h *Handlers) statusHandler(w http.ResponseWriter, r *http.Request) {
 		status["kiwix_note"] = "Place kiwix-serve in sidecars/kiwix-serve/<os>/"
 	} else {
 		status["kiwix_sidecar"] = sidecarPath
+		if lastErr := h.kiwix.GetLastError(); lastErr != "" {
+			status["kiwix_note"] = lastErr
+		}
 	}
 
 	writeJSON(w, http.StatusOK, status)

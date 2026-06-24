@@ -63,34 +63,28 @@ export function ModuleCard({ module, onToggle }: ModuleCardProps) {
   return (
     <div
       className={cn(
-        'glass-panel p-4 transition-all duration-200 group',
-        'hover:border-slate-600/60 hover:bg-slate-800/60',
-        module.enabled && 'border-emerald-500/20 glow-emerald',
-        isUnavailable && 'opacity-50'
+        'glass-panel p-4 transition-all duration-200 group flex flex-col gap-4 text-left border',
+        'hover:border-emerald-500/30 hover:bg-slate-800/80',
+        module.enabled ? 'border-emerald-500/40 bg-emerald-950/10' : 'border-slate-700/50',
+        isUnavailable && 'opacity-50 cursor-not-allowed'
       )}
     >
-      {/* Top row: icon + toggle */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between gap-4 w-full">
         <div
           className={cn(
-            'flex items-center justify-center w-9 h-9 rounded-lg transition-colors',
+            'flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300',
             module.enabled
-              ? 'bg-emerald-600/15 border border-emerald-500/25'
-              : 'bg-slate-800/60 border border-slate-700/40'
+              ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+              : 'bg-slate-800 text-slate-500'
           )}
         >
-          <Icon
-            className={cn(
-              'h-4.5 w-4.5 transition-colors',
-              module.enabled ? 'text-emerald-400' : 'text-slate-500'
-            )}
-          />
+          <Icon className="h-5 w-5" />
         </div>
         <Switch
           checked={module.enabled}
           onCheckedChange={() => onToggle(module.id)}
           disabled={isUnavailable}
-          className="data-[state=checked]:bg-emerald-600"
+          className="data-[state=checked]:bg-emerald-500"
         />
       </div>
 

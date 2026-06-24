@@ -2,14 +2,11 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Search,
   BookOpen,
-  FileText,
   HardDrive,
   AlertCircle,
   ArrowLeft,
-  ExternalLink,
   Loader2,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { apiFetch } from '@/hooks/useApi'
 
 interface ZIMFile {
@@ -104,185 +101,146 @@ export function KnowledgePage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        {viewState !== 'home' && (
+    <div className="flex flex-col h-full bg-[#030712] relative overflow-hidden">
+      {/* Background ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+      {/* Header for non-home states */}
+      {viewState !== 'home' && (
+        <div className="flex-none p-4 md:p-6 border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl z-10 sticky top-0 flex items-center gap-4">
           <button
-            onClick={() => setViewState('home')}
-            className="p-2 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-slate-200"
+            onClick={() => setViewState(viewState === 'article' ? 'search' : 'home')}
+            className="p-2 rounded-xl hover:bg-slate-800/80 transition-all text-slate-400 hover:text-emerald-400 group"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
           </button>
-        )}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-blue-600/20 border border-blue-500/30">
-            <BookOpen className="h-4 w-4 text-blue-400" />
+          
+          <form onSubmit={handleSearch} className="flex-1 max-w-3xl relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500/50" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search offline encyclopedias..."
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/50 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all shadow-inner shadow-black/20"
+            />
+            {searching && (
+              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-emerald-500" />
+            )}
+          </form>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto z-10">
+        
+        {/* Google-like Home State */}
+        {viewState === 'home' && (
+          <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+            <div className="w-20 h-20 bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 rounded-3xl flex items-center justify-center mb-8 border border-emerald-500/20 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+              <BookOpen className="h-10 w-10 text-emerald-400" />
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-8 text-center">
+              Knowledge Library
+            </h1>
+
+            <form onSubmit={handleSearch} className="w-full max-w-2xl relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-emerald-400" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search offline encyclopedias, wikis, and manuals..."
+                className="w-full pl-14 pr-6 py-4 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-slate-700/50 text-lg text-slate-100 placeholder:text-slate-500/80 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-2xl shadow-black/40"
+              />
+              {searching && (
+                <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-emerald-500" />
+              )}
+            </form>
+
+            <div className="mt-8 flex gap-4 text-sm text-slate-400">
+              <div className="px-4 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-emerald-400/70" />
+                {status?.zim_files_count || 0} Content Packs
+              </div>
+              <div className="px-4 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${status?.kiwix_running ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-red-500'}`} />
+                {status?.kiwix_running ? 'Engine Online' : 'Engine Offline'}
+              </div>
+            </div>
+
+            {status?.kiwix_note && (
+              <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 max-w-2xl text-left">
+                <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                <p className="text-sm text-red-200/90 leading-relaxed">{status.kiwix_note}</p>
+              </div>
+            )}
           </div>
-          <div>
-            <h1 className="text-xl font-semibold text-slate-100">Knowledge library</h1>
-            <p className="text-xs text-slate-500">
-              Search offline encyclopedias and references
+        )}
+
+        {/* Search Results */}
+        {viewState === 'search' && (
+          <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-4">
+            <p className="text-sm font-medium text-slate-400 mb-6">
+              About {results.length} results
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search bar */}
-      <form onSubmit={handleSearch} className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search articles, topics, references…"
-          className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-100 
-                     placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 
-                     focus:ring-emerald-500/20 transition-all text-sm"
-        />
-        {searching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-emerald-500" />
-        )}
-      </form>
-
-      {/* View states */}
-      {viewState === 'home' && (
-        <div className="space-y-4">
-          {/* Status card */}
-          <div className="glass-panel p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <HardDrive className="h-4 w-4 text-slate-400" />
-              <h2 className="text-sm font-semibold text-slate-200">Content status</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Kiwix status */}
-              <div className="rounded-lg border border-slate-700/30 bg-slate-800/20 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`status-dot ${status?.kiwix_running ? 'status-dot-active' : 'status-dot-inactive'}`} />
-                  <span className="text-xs font-medium text-slate-500 uppercase">Kiwix engine</span>
-                </div>
-                <p className="text-sm font-semibold text-slate-100">
-                  {status?.kiwix_running ? 'Running' : 'Not running'}
-                </p>
-                {status?.kiwix_note && (
-                  <p className="text-[11px] text-amber-500/80 mt-1">{status.kiwix_note}</p>
-                )}
+            
+            {results.length === 0 && !searching && (
+              <div className="py-20 text-center">
+                <Search className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">No results found for "{query}"</h3>
+                <p className="text-slate-500">Try adjusting your keywords or adding more ZIM content packs.</p>
               </div>
+            )}
 
-              {/* ZIM files */}
-              <div className="rounded-lg border border-slate-700/30 bg-slate-800/20 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-3.5 w-3.5 text-slate-500" />
-                  <span className="text-xs font-medium text-slate-500 uppercase">ZIM files</span>
-                </div>
-                <p className="text-2xl font-semibold text-slate-100">{status?.zim_files_count || 0}</p>
-                <p className="text-[11px] text-slate-500">content packs found</p>
-              </div>
-
-              {/* Articles available */}
-              <div className="rounded-lg border border-slate-700/30 bg-slate-800/20 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="h-3.5 w-3.5 text-slate-500" />
-                  <span className="text-xs font-medium text-slate-500 uppercase">Status</span>
-                </div>
-                <p className="text-sm font-semibold text-slate-100">
-                  {status?.zim_files_count ? 'Ready to search' : 'No content'}
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  {status?.zim_files_count ? 'Enter a query above' : 'Add ZIM files to content-packs/'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* ZIM file list */}
-          {status?.zim_files && status.zim_files.length > 0 && (
-            <div className="glass-panel p-5">
-              <h2 className="text-sm font-semibold text-slate-200 mb-3">Available content packs</h2>
-              <div className="space-y-2">
-                {status.zim_files.map((zf) => (
-                  <div
-                    key={zf.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-slate-700/30 bg-slate-800/20"
+            <div className="space-y-6">
+              {results.map((result, idx) => (
+                <div key={idx} className="group">
+                  <p className="text-xs font-mono text-emerald-400/70 mb-1 flex items-center gap-2">
+                    <BookOpen className="h-3 w-3" />
+                    {result.zim_id}
+                  </p>
+                  <button
+                    onClick={() => handleViewArticle(result.zim_id, result.path)}
+                    className="block text-left"
                   >
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-4 w-4 text-blue-400" />
-                      <div>
-                        <p className="text-sm font-medium text-slate-200">{zf.name}</p>
-                        <p className="text-[11px] text-slate-500 font-mono">{zf.id}</p>
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-xs text-slate-400">{zf.size_human}</Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {(!status?.zim_files || status.zim_files.length === 0) && (
-            <div className="glass-panel p-8 text-center">
-              <AlertCircle className="h-8 w-8 text-slate-600 mx-auto mb-3" />
-              <h3 className="text-sm font-semibold text-slate-300 mb-1">No content packs found</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Download ZIM files (such as Wikipedia, Stack Overflow, or survival manuals) and place them in the{' '}
-                <code className="text-emerald-400 bg-slate-800 px-1 py-0.5 rounded text-[11px]">content-packs/</code>{' '}
-                directory, then restart AEGIS.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {viewState === 'search' && (
-        <div className="space-y-2">
-          <p className="text-xs text-slate-500 mb-3">
-            {results.length} result{results.length !== 1 ? 's' : ''} for "{query}"
-          </p>
-          {results.length === 0 && !searching && (
-            <div className="glass-panel p-8 text-center">
-              <Search className="h-6 w-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No results found</p>
-              <p className="text-xs text-slate-500 mt-1">Try a different query or check your content packs</p>
-            </div>
-          )}
-          {results.map((result, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleViewArticle(result.zim_id, result.path)}
-              className="w-full text-left glass-panel p-4 hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-slate-100 group-hover:text-emerald-400 transition-colors truncate">
-                    {result.title}
-                  </h3>
+                    <h3 className="text-xl font-semibold text-slate-200 group-hover:text-emerald-400 group-hover:underline decoration-emerald-400/30 underline-offset-4 transition-colors mb-2 leading-tight">
+                      {result.title}
+                    </h3>
+                  </button>
                   {result.snippet && (
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">{result.snippet}</p>
+                    <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 max-w-3xl">
+                      {result.snippet}
+                    </p>
                   )}
-                  <p className="text-[11px] text-slate-600 mt-1 font-mono">{result.zim_id}</p>
                 </div>
-                <ExternalLink className="h-3.5 w-3.5 text-slate-600 group-hover:text-emerald-400 flex-shrink-0 mt-1" />
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+              ))}
+            </div>
+          </div>
+        )}
 
-      {viewState === 'article' && (
-        <div className="glass-panel p-6">
-          <h2 className="text-sm font-semibold text-slate-200 mb-4">{articleTitle}</h2>
-          <div
-            className="prose prose-invert prose-sm max-w-none 
-                       prose-headings:text-slate-200 prose-p:text-slate-300 
-                       prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
-                       prose-code:text-emerald-400 prose-code:bg-slate-800/60 prose-code:px-1 prose-code:rounded
-                       prose-img:rounded-lg prose-hr:border-slate-700"
-            dangerouslySetInnerHTML={{ __html: articleHtml }}
-          />
-        </div>
-      )}
+        {/* Article Reader */}
+        {viewState === 'article' && (
+          <div className="p-4 md:p-8 max-w-4xl mx-auto">
+            <div className="glass-panel p-6 md:p-10 shadow-2xl">
+              <h1 className="text-3xl font-bold text-slate-100 mb-8 pb-6 border-b border-slate-700/50">{articleTitle}</h1>
+              <div
+                className="prose prose-invert prose-lg max-w-none 
+                           prose-headings:text-slate-200 prose-headings:font-semibold
+                           prose-p:text-slate-300 prose-p:leading-relaxed
+                           prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
+                           prose-code:text-emerald-300 prose-code:bg-slate-800/80 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
+                           prose-img:rounded-xl prose-img:shadow-xl
+                           prose-hr:border-slate-700/50
+                           prose-li:text-slate-300"
+                dangerouslySetInnerHTML={{ __html: articleHtml }}
+              />
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   )
 }

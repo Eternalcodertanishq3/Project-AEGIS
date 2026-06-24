@@ -13,9 +13,26 @@ export function useSystemProfile() {
 
     async function fetchProfile() {
       try {
-        const data = await apiFetch<SystemProfile>('/system/profile')
+        const [profData, powerData] = await Promise.all([
+          apiFetch<any>('/system/profile'),
+          apiFetch<any>('/system/power')
+        ])
+        
         if (!cancelled) {
-          setProfile(data)
+          setProfile({
+            hardwareTier: (profData.tier.charAt(0).toUpperCase() + profData.tier.slice(1)) as any,
+            os: profData.os,
+            arch: profData.arch,
+            cpuCores: profData.cpu_cores,
+            ramTotal: `${(profData.total_ram_mb / 1024).toFixed(1)} GB`,
+            ramUsed: 'Unknown',
+            ramPercent: 0,
+            batteryPercent: powerData.battery_percent,
+            batteryCharging: powerData.status === 'charging' || powerData.status === 'ac_power',
+            isOnline: false,
+            uptime: 'Unknown',
+            hostname: profData.hostname
+          })
           setError(null)
         }
       } catch {

@@ -6,10 +6,10 @@ import {
   Download,
   Loader2,
   Globe,
-  Maximize2,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { apiFetch } from '@/hooks/useApi'
+import { MapViewer } from './MapViewer'
 
 interface PMTilesFile {
   id: string
@@ -74,63 +74,30 @@ export function MapsPage() {
       {/* Map viewer area */}
       <div className="glass-panel overflow-hidden">
         {selectedMap ? (
-          <div className="relative">
-            {/* Map container — placeholder since MapLibre needs the JS library loaded at runtime */}
-            <div className="relative h-[500px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-              {/* Grid overlay to simulate map tiles */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="h-full w-full" style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(16,185,129,0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(16,185,129,0.3) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '60px 60px',
-                }} />
-              </div>
-
-              {/* Center content */}
-              <div className="relative z-10 text-center space-y-4">
-                <Globe className="h-16 w-16 text-emerald-500/30 mx-auto" />
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-200">Map ready</h3>
-                  <p className="text-sm text-slate-400 mt-1">
-                    <span className="text-emerald-400 font-medium">{selectedMap.name}</span>
-                  </p>
-                  <p className="text-xs text-slate-500 mt-2 max-w-md mx-auto">
-                    PMTiles file detected ({selectedMap.size_human}). MapLibre GL JS will render 
-                    interactive tiles from this file when loaded in a full browser session.
-                  </p>
-                </div>
-
-                {/* Map info badges */}
-                <div className="flex items-center justify-center gap-2">
-                  <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-500/30 text-xs">
-                    <Layers className="h-3 w-3 mr-1" />
-                    PMTiles
-                  </Badge>
-                  <Badge variant="outline" className="text-xs text-slate-400">
-                    {selectedMap.size_human}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs text-slate-400">
-                    Offline ready
-                  </Badge>
+          <div className="relative border border-slate-700/50 rounded-xl overflow-hidden shadow-2xl">
+            {/* Map container */}
+            <div className="relative h-[600px] w-full bg-slate-900">
+              <MapViewer pmtilesUrl={`/api/maps/tiles/${selectedMap.id}/file.pmtiles`} />
+              
+              {/* Overlay HUD */}
+              <div className="absolute top-4 left-4 z-10 pointer-events-none">
+                <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-lg p-3 shadow-lg flex items-center gap-3 pointer-events-auto">
+                  <Globe className="h-5 w-5 text-emerald-400" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-200">{selectedMap.name}</h3>
+                    <p className="text-xs text-slate-400">Offline PMTiles • {selectedMap.size_human}</p>
+                  </div>
                 </div>
               </div>
-
-              {/* Fullscreen hint */}
-              <button className="absolute top-3 right-3 p-2 rounded-lg bg-slate-800/80 border border-slate-700/50 
-                                 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors">
-                <Maximize2 className="h-4 w-4" />
-              </button>
             </div>
 
             {/* Map details bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-700/50 bg-slate-900/50">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/80 backdrop-blur-md border-t border-slate-700/50">
               <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                <span className="status-dot status-dot-active" />
-                <span>{selectedMap.name}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-emerald-400 font-medium">MapLibre GL Active</span>
                 <span className="text-slate-700">|</span>
-                <span>Tile server on /api/maps/tiles/{selectedMap.id}/</span>
+                <span>Source: /api/maps/tiles/{selectedMap.id}/</span>
               </div>
               <span className="text-[11px] text-slate-600 font-mono">{selectedMap.id}</span>
             </div>

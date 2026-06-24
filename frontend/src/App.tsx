@@ -59,12 +59,14 @@ function App() {
       case 'overview':
       default:
         return (
-          <div className="p-6 space-y-6 max-w-7xl">
+          <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
             {/* Page title */}
-            <div>
-              <h1 className="text-xl font-semibold text-slate-100">Command center</h1>
-              <p className="text-sm text-slate-400 mt-1">
-                Monitor and manage all AEGIS modules from a single dashboard
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-400">
+                Command Center
+              </h1>
+              <p className="text-sm font-medium text-slate-500 max-w-2xl">
+                Monitor and manage all AEGIS modules from a single, unified dashboard.
               </p>
             </div>
 
@@ -72,24 +74,26 @@ function App() {
             <SystemOverview profile={profile} />
 
             {/* Module grid */}
-            <ModuleGrid modules={modules} onToggle={toggleModule} />
+            <div className="pt-4">
+              <ModuleGrid modules={modules} onToggle={toggleModule} />
+            </div>
           </div>
         )
     }
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col h-screen bg-[#030712] text-slate-100 selection:bg-emerald-500/30">
       {/* Header */}
       <Header profile={profile} />
 
       {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar */}
         <Sidebar activeItem={activeNav} onNavigate={setActiveNav} />
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex flex-col flex-1 h-full overflow-y-auto relative z-0 scroll-smooth bg-[#030712]">
           {renderPage()}
         </main>
       </div>
